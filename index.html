@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Godfather Web Services</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:      #0a0a0a;
+      --charcoal:   #141414;
+      --deep:       #1C1C1C;
+      --panel:      #242424;
+      --border:     rgba(255,255,255,0.08);
+      --gold:       #C9A84C;
+      --gold-light: #E3C06F;
+      --gold-dim:   rgba(201,168,76,0.15);
+      --white:      #F5F2EC;
+      --muted:      rgba(245,242,236,0.55);
+      --accent-red: #C0392B;
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* HEADER & NAV */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 0 5vw;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10,10,10,0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.3s;
+    }
+    
+    .header-cta{
+      display: flex; 
+      align-items: center; 
+      width: 100vw; 
+      justify-content: space-between;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    
+    .logo2 img {
+      height: 40px;
+      margin-left: 10px;
+      margin-right: 10px;
+      }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+
+    .logo-text span {
+      display: block;
+      font-size: 10px;
+      font-family: var(--font-body);
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--gold); }
+
+    .nav-cta {
+      background: var(--gold) !important;
+      color: var(--black) !important;
+      padding: 8px 22px;
+      border-radius: 2px;
+      font-weight: 700 !important;
+      transition: background 0.2s, transform 0.15s !important;
+    }
+
+    .nav-cta:hover {
+      background: var(--gold-light) !important;
+      transform: translateY(-1px);
+    }
+
+    /*SIDE BAR*/
+    .sidebar {
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100vh;
+      width: 250px;
+      background: var(--deep);
+      color: #F5F2EC;
+      z-index: 1000;
+      transform: translateX(250);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+      overflow-y: auto;
+    }
+
+    .sidebar.open {
+      transform:translateX(0)
+    }
+
+    .sidebar-header {
+      padding: 2rem 1.5rem;
+      font-family: var(--font-display);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-logo {
+      font-size: 1rem;
+      font-weight: bold;
+      color:#C9A84C;
+      margin-top: 0.5rem;
+    }
+
+    .sidebar-tagline {
+      font-size: 0.85rem;
+      color: var(--white);
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+      padding: 1rem 0;
+    }
+
+    .sidebar nav li {
+      margin: 0;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      color: var(--white);
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar nav a.hover {
+      background: rgba(255,255,255,0.1);
+      border-left-color: var(--gold-light);
+      padding-left: 2rem;
+    }
+
+    .sidebar nav a.active {
+      background: rgba(255,255,255,0.15);
+      border-left-color: var(--gold-light);
+    }
+
+    .nav-icon {
+      font-size: 1.2rem;
+      min-width: 24px;
+    }
+
+    /*TOGGLE BUTTON*/
+    .sidebar-toggle {
+      position: fixed;
+      right: 1rem;
+      top: 1rem;
+      width: 50px;
+      height: 50px;
+      background: var(--deep);
+      border: none;
+      border-radius: 50%;
+      color: var(--white);
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(255,255,255,0.15);
+      transform: scale(1.1)
+    }
+
+    .sidebar-toggle.open {
+      right: 270px;
+    }
+
+    /*OVERLAY*/
+    .overlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 5vw 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 50%, rgba(201,168,76,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 10% 80%, rgba(192,57,43,0.05) 0%, transparent 60%),
+        var(--black);
+    }
+
+    .hero-grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 0%, transparent 80%);
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 28px;
+      position: relative;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 28px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 8.5vw, 128px);
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      max-width: 14ch;
+      position: relative;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .hero-headline em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      margin-top: 32px;
+      font-size: clamp(16px, 1.5vw, 20px);
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.75;
+      position: relative;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-actions {
+      margin-top: 48px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: relative;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gold);
+      color: var(--black);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(201,168,76,0.3);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      border-radius: 2px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, color 0.2s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    .hero-stats {
+      margin-top: 80px;
+      display: flex;
+      gap: 60px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 40px;
+      position: relative;
+      animation: fadeUp 0.7s 0.4s ease both;
+    }
+
+    .stat-item strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .stat-item span {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* TRUST BAR */
+    .trust-bar {
+      background: var(--charcoal);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 5vw;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    .trust-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .trust-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .trust-scroll {
+      display: flex;
+      gap: 48px;
+      animation: marquee 20s linear infinite;
+    }
+
+    .trust-item {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(245,242,236,0.4);
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* SECTIONS */
+    section { padding: 120px 5vw; }
+
+    .section-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .section-eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin-bottom: 20px;
+    }
+
+    .section-title em { font-style: italic; color: var(--gold); }
+
+    .section-lead {
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.75;
+    }
+
+    /* SERVICES */
+    .services { background: var(--charcoal); }
+
+    .services-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: end;
+      margin-bottom: 80px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .service-card {
+      background: var(--charcoal);
+      padding: 52px 44px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .service-card:hover { background: var(--deep); }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .service-card:hover::before { transform: scaleX(1); }
+
+    .service-number {
+      font-family: var(--font-display);
+      font-size: 80px;
+      font-weight: 700;
+      color: rgba(201,168,76,0.08);
+      line-height: 1;
+      position: absolute;
+      top: 24px; right: 24px;
+      pointer-events: none;
+      transition: color 0.3s;
+    }
+
+    .service-card:hover .service-number { color: rgba(201,168,76,0.15); }
+
+    .service-icon {
+      width: 52px; height: 52px;
+      border: 1px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+      color: var(--gold);
+      font-size: 20px;
+    }
+
+    .service-card h3 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .service-card p {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    .service-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .service-features li {
+      font-size: 13px;
+      color: rgba(245,242,236,0.7);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .service-features li::before {
+      content: '';
+      width: 14px; height: 1px;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .service-link {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: gap 0.2s;
+    }
+    
+    .service-samplelink {
+      font-size: 10px;
+      font-weight: regular;
+      letter-spacing: 0.15em;
+      margin-top: 15px;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: gap 0.2s;
+    }
+
+    .service-link:hover { gap: 14px; }
+
+    /* MARQUEE BAR */
+    .marquee-section {
+      background: var(--gold);
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .marquee-track {
+      display: flex;
+      animation: marquee 18s linear infinite;
+      padding: 20px 0;
+    }
+
+    .marquee-item {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      padding: 0 40px;
+      white-space: nowrap;
+    }
+
+    .marquee-item span {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--black);
+    }
+
+    .marquee-dot {
+      width: 6px; height: 6px;
+      background: var(--black);
+      border-radius: 50%;
+      opacity: 0.4;
+    }
+
+    /* PROCESS */
+    .process { background: var(--black); }
+
+    .process-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 80px;
+      align-items: start;
+      margin-top: 80px;
+    }
+
+    .process-step {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 24px;
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .process-step:first-child { border-top: 1px solid var(--border); }
+
+    .step-num {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 700;
+      color: rgba(201,168,76,0.2);
+      line-height: 1;
+      transition: color 0.3s;
+    }
+
+    .process-step:hover .step-num { color: var(--gold); }
+
+    .step-content h4 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      transition: color 0.3s;
+    }
+
+    .process-step:hover .step-content h4 { color: var(--gold); }
+
+    .step-content p {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .process-visual {
+      position: sticky;
+      top: 100px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 60px;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .process-visual-ring {
+      width: 200px; height: 200px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 50%;
+      position: relative;
+      margin-bottom: 40px;
+      animation: spin 20s linear infinite;
+    }
+
+    .process-visual-ring::before {
+      content: '';
+      position: absolute;
+      top: -4px; left: 50%;
+      transform: translateX(-50%);
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+
+    .process-visual-inner {
+      position: absolute;
+      inset: 20px;
+      border: 1px solid rgba(201,168,76,0.1);
+      border-radius: 50%;
+      animation: spin 12s linear infinite reverse;
+    }
+
+    .process-visual-core {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: none;
+    }
+
+    .process-visual-logo {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--gold);
+      animation: counterSpin 20s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes counterSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(-360deg); }
+    }
+
+    .process-visual h4 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .process-visual p {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+      max-width: 260px;
+      line-height: 1.75;
+    }
+
+    /* ABOUT */
+    .about { background: var(--charcoal); }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px;
+      align-items: center;
+    }
+
+    .about-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 60px 52px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-card::after {
+      content: '"';
+      font-family: var(--font-display);
+      font-size: 300px;
+      font-weight: 700;
+      color: rgba(201,168,76,0.04);
+      position: absolute;
+      top: -60px; right: -20px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .about-quote {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--white);
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .about-card-meta { display: flex; align-items: center; gap: 16px; }
+
+    .about-avatar {
+      width: 48px; height: 48px;
+      background: var(--gold-dim);
+      border: 1px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .about-card-name { font-size: 15px; font-weight: 600; }
+    .about-card-role { font-size: 12px; color: var(--muted); letter-spacing: 0.05em; }
+
+    .about-badge {
+      position: absolute;
+      bottom: -24px; right: -24px;
+      width: 120px; height: 120px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .about-badge strong {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--black);
+      line-height: 1;
+    }
+
+    .about-badge span {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--black);
+      opacity: 0.7;
+    }
+
+    .about-content .section-lead { margin-bottom: 36px; }
+
+    .about-body {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.85;
+      margin-bottom: 28px;
+    }
+
+    .about-pillars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .pillar {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+    }
+
+    .pillar h5 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .pillar p { font-size: 13px; color: var(--muted); font-weight: 300; line-height: 1.65; }
+
+    /* WHY US */
+    .why-us { background: var(--black); }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 72px;
+    }
+
+    .why-card {
+      background: var(--black);
+      padding: 48px 36px;
+      transition: background 0.3s;
+    }
+
+    .why-card:hover { background: var(--charcoal); }
+    .why-icon { font-size: 28px; margin-bottom: 20px; }
+
+    .why-card h4 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .why-card p { font-size: 14px; color: var(--muted); font-weight: 300; line-height: 1.75; }
+
+    /* TESTIMONIALS */
+    .testimonials { background: var(--charcoal); }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 72px;
+    }
+
+    .testimonial-card { background: var(--charcoal); padding: 48px 40px; }
+
+    .testimonial-stars { display: flex; gap: 4px; margin-bottom: 24px; }
+    .star { color: var(--gold); font-size: 14px; }
+
+    .testimonial-text {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.55;
+      color: var(--white);
+      margin-bottom: 32px;
+    }
+
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+
+    .testimonial-avatar {
+      width: 40px; height: 40px;
+      background: var(--gold-dim);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .author-name { font-size: 14px; font-weight: 600; }
+    .author-org { font-size: 12px; color: var(--muted); }
+
+    /* CTA */
+    .cta-section {
+      background: var(--black);
+      padding: 140px 5vw;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(201,168,76,0.08) 0%, transparent 70%);
+    }
+
+    .cta-section .section-eyebrow { justify-content: center; }
+    .cta-section .section-title { max-width: 16ch; margin: 0 auto 24px; }
+    .cta-section .section-lead { margin: 0 auto 56px; text-align: center; }
+
+    .cta-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+    /* DESIGN SYSTEM PANEL */
+    .design-system {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 60px;
+      margin: 0 5vw 80px;
+      position: relative;
+    }
+
+    .design-system-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 2px;
+      margin-bottom: 20px;
+    }
+
+    .design-system h3 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .design-system > p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 48px;
+    }
+
+    .ds-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; }
+
+    .ds-section h4 {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .color-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .swatch { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+    .swatch-block {
+      width: 64px; height: 64px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+    }
+
+    .swatch-label { font-size: 10px; color: var(--muted); text-align: center; line-height: 1.4; }
+
+    .type-samples { display: flex; flex-direction: column; gap: 20px; }
+    .type-sample { border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+
+    .type-sample-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .type-display { font-family: var(--font-display); font-size: 32px; font-weight: 700; }
+    .type-display-italic { font-family: var(--font-display); font-size: 28px; font-style: italic; color: var(--gold); }
+    .type-body { font-family: var(--font-body); font-size: 15px; font-weight: 300; color: var(--muted); }
+    .type-caps { font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+
+    .design-notes { display: flex; flex-direction: column; gap: 14px; }
+
+    .design-note {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .design-note-arrow { color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+
+    /* FOOTER */
+    footer {
+      background: var(--charcoal);
+      border-top: 1px solid var(--border);
+      padding: 80px 5vw 40px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 60px;
+    }
+
+    .footer-desc {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-top: 20px;
+      max-width: 320px;
+    }
+
+    .footer-col h5 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+
+    .footer-links a {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--gold); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-copy { font-size: 13px; color: var(--muted); }
+    .footer-copy span { color: var(--gold); }
+
+    .footer-legal { display: flex; gap: 24px; }
+
+    .footer-legal a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-legal a:hover { color: var(--gold); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* RESPONSIVE */
+    @media (max-width: 960px) {
+      .services-grid { grid-template-columns: 1fr; }
+      .services-header { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 60px; }
+      .process-grid { grid-template-columns: 1fr; }
+      .process-visual { position: static; }
+      .why-grid { grid-template-columns: 1fr 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+      .ds-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .why-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .about-pillars { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+      .hero-stats { gap: 36px; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 80%;
+        max-width: 300px;
+        transform: translateX(100%);
+      }
+
+      .sidebar.open {
+        transform:translateX(0)
+      }
+
+      .sidebar-toggle.open {
+        left: calc(80%+20px);
+        max-left: 320px;
+      }
+
+    }
+    
+    @media (min-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+      
+      .sidebar-toggle {
+        display: none;
+        }
+        
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+ <header> 
+  <div class="header-cta">
+    <div class="container">
+      <a href="#" class="logo">
+        <div class="logo-icon"><img src="assets/icon.png"></div>
+        <div class="logo-text">
+          GODFATHER WEB SERVICES
+          <span>Web Development Agency</span>
+        </div>
+      </a>
+    </div>
+    <div>
+        <ul class="nav-links">
+          <li><a href="#services">Services</a></li>
+          <li><a href="#process">Process</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#testimonials">Clients</a></li>
+          <li><a href="#contact" class="nav-cta">Start a Project</a></li>
+        </ul>
+      <!--SIDEBAR TOGGLE AND OVERLAY-->
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Menu">☰</button>
+      <div class="overlay" id="overlay"></div>
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo img"><img src="assets/icon.png"></div>
+          <div class="sidebar-logo">GODFATHER WEB SERVICES</div>
+          <div class="sidebar-tagline">Web Design Agency</div>
+        </div>
+        <nav><ul>
+          <li><a href="#services" class="navlink active">Services</a></li>
+          <li><a href="#process" class="navlink">Process</a></li>
+          <li><a href="#about" class="navlink">About</a></li>
+          <li><a href="#testimonials" class="navlink">Clients</a></li>
+          <li><a href="#contact" class="navlink">Start a Project</a></li>
+        </ul></nav>
+      </aside>
+    </div>
+ </div>
+  
+</header>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+
+  <div class="hero-eyebrow">Web Development Agency — Africa &amp; Beyond</div>
+
+  <h1 class="hero-headline">
+    Your Vision.<br>
+    <em>Our Craft.</em><br>
+    Real Results.
+  </h1>
+
+  <p class="hero-sub">
+    We design and build high-performance websites that command authority, drive conversions, and move organizations forward — from Lagos to London and everywhere in between.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#services" class="btn-primary">
+      Explore Our Services
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <a href="#about" class="btn-secondary">Our Story</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <strong>10+</strong>
+      <span>Projects Delivered</span>
+    </div>
+    <div class="stat-item">
+      <strong>2</strong>
+      <span>African Countries Served</span>
+    </div>
+    <div class="stat-item">
+      <strong>99%</strong>
+      <span>Client Satisfaction</span>
+    </div>
+    <div class="stat-item">
+      <strong>3×</strong>
+      <span>Avg. Conversion Uplift</span>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <span class="trust-label">Trusted By</span>
+  <div class="trust-divider"></div>
+  <div style="overflow:hidden; flex:1;">
+    <div class="trust-scroll">
+      <span class="trust-item">Nonprofit Organizations</span>
+      <span class="trust-item">Schools &amp; Universities</span>
+      <span class="trust-item">Churches &amp; Faith Communities</span>
+      <span class="trust-item">Affiliate Marketers</span>
+      <span class="trust-item">Event Promoters</span>
+      <span class="trust-item">Government Agencies</span>
+      <span class="trust-item">Product Sellers</span>
+      <span class="trust-item">SMEs &amp; Startups</span>
+      <span class="trust-item">Nonprofit Organizations</span>
+      <span class="trust-item">Schools &amp; Universities</span>
+      <span class="trust-item">Churches &amp; Faith Communities</span>
+      <span class="trust-item">Affiliate Marketers</span>
+      <span class="trust-item">Event Promoters</span>
+      <span class="trust-item">Government Agencies</span>
+      <span class="trust-item">Product Sellers</span>
+      <span class="trust-item">SMEs &amp; Startups</span>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="services-header">
+    <div>
+      <div class="section-eyebrow reveal">What We Build</div>
+      <h2 class="section-title reveal reveal-delay-1">Three Specialities.<br><em>Infinite Impact.</em></h2>
+    </div>
+    <p class="section-lead reveal reveal-delay-2">
+      Every website we build is purpose-engineered — not templated. We combine strategic thinking with premium design to create digital platforms that perform.
+    </p>
+  </div>
+
+  <div class="services-grid">
+
+    <!-- SERVICE 01 -->
+    <div class="service-card reveal">
+      <div class="service-number">01</div>
+      <div class="service-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <h3>Organizational Websites</h3>
+      <p>
+        We build authoritative, credibility-first websites for schools, NGOs, churches, and institutions. Your website should communicate your mission with clarity — and compel action from every visitor who lands on it.
+      </p>
+      <ul class="service-features">
+        <li>Schools, Colleges &amp; Educational Institutions</li>
+        <li>NGOs, Foundations &amp; Nonprofits</li>
+        <li>Churches, Ministries &amp; Faith Organizations</li>
+        <li>Government Agencies &amp; Community Bodies</li>
+        <li>Professional Associations &amp; Member Clubs</li>
+      </ul>
+      <a href="#contact" class="service-link">
+        Build My Organization's Site
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="pages/sample-site1/sample-site1.html" class="service-samplelink">
+        View Sample Site
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <!-- SERVICE 02 -->
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-number">02</div>
+      <div class="service-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>High-Converting Landing Pages</h3>
+      <p>
+        For affiliate marketers and product sellers, every pixel earns its place. We engineer landing pages built around one goal: turning traffic into revenue. Persuasive copy. Precision design. Proven frameworks.
+      </p>
+      <ul class="service-features">
+        <li>Affiliate Marketing &amp; Lead Capture Pages</li>
+        <li>Product Sales &amp; E-commerce Funnels</li>
+        <li>Digital Offer &amp; Course Launch Pages</li>
+        <li>Webinar &amp; Opt-in Registration Pages</li>
+        <li>A/B-Ready, Analytics-Integrated Builds</li>
+      </ul>
+      <a href="#contact" class="service-link">
+        Build My Landing Page
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="pages/sample-site2/sample-site2.html" class="service-samplelink">
+        View Sample Site
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <!-- SERVICE 03 -->
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-number">03</div>
+      <div class="service-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <h3>Event &amp; Ticket Sales Websites</h3>
+      <p>
+        From conferences to concerts to crusades — we build event websites that generate buzz and sell tickets. Integrated payment processing, countdown timers, speaker showcases, and seamless attendee management.
+      </p>
+      <ul class="service-features">
+        <li>Corporate &amp; Industry Conferences</li>
+        <li>Concerts, Festivals &amp; Entertainment Events</li>
+        <li>Church Conventions &amp; Crusades</li>
+        <li>Online Ticketing &amp; Payment Integrations</li>
+        <li>Post-Event Archives &amp; Replay Access</li>
+      </ul>
+      <a href="#contact" class="service-link">
+        Build My Event Site
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="pages/sample-site3/sample-site3.html" class="service-samplelink">
+        View Sample Site
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- MARQUEE VALUE BAR -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item"><span>Fast Delivery</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Mobile-First Design</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Built for Conversion</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>SEO-Ready Architecture</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>African &amp; Global Reach</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Premium, Not Generic</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Fast Delivery</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Mobile-First Design</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Built for Conversion</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>SEO-Ready Architecture</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>African &amp; Global Reach</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Premium, Not Generic</span><div class="marquee-dot"></div></div>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <div class="section-eyebrow reveal">How We Work</div>
+  <h2 class="section-title reveal reveal-delay-1">A Process Built<br><em>for Results.</em></h2>
+
+  <div class="process-grid">
+    <div>
+      <div class="process-step reveal">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h4>Discovery &amp; Strategy</h4>
+          <p>We start by understanding your goals, audience, and competitive landscape. Every decision is anchored in clarity and strategic intent — no guesswork.</p>
+        </div>
+      </div>
+      <div class="process-step reveal reveal-delay-1">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h4>Architecture &amp; Wireframing</h4>
+          <p>Before a single pixel of design, we map user journeys, content hierarchy, and conversion pathways to ensure every element earns its place on the page.</p>
+        </div>
+      </div>
+      <div class="process-step reveal reveal-delay-2">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h4>Design &amp; Development</h4>
+          <p>Premium visual design meets clean, high-performance code. We build fast, responsive, and accessible websites that look extraordinary on every device.</p>
+        </div>
+      </div>
+      <div class="process-step reveal reveal-delay-3">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h4>Launch &amp; Optimization</h4>
+          <p>We test, refine, and launch with precision — then monitor, measure, and iterate to ensure your site keeps performing long after it goes live.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="process-visual reveal reveal-delay-2">
+      <div class="process-visual-ring">
+        <div class="process-visual-inner"></div>
+        <div class="process-visual-core">
+          <div class="logo img"><img src="assets/icon.png"></div>
+        </div>
+      </div>
+      <h4>Relentless Craft</h4>
+      <p>We don't ship average. Every project is built with the attention of a craftsman and the precision of an engineer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-grid">
+    <div class="about-visual">
+      <div class="about-card reveal">
+        <p class="about-quote">
+          "We don't just build websites. We build the digital backbone of your brand — the platform that speaks for you while you sleep."
+        </p>
+        <div class="about-card-meta">
+          <div class="about-avatar"><div class="logo2 img"><img src="assets/icon.png"></div></div>
+          <div>
+            <div class="about-card-name">Godfather Web Services</div>
+            <div class="about-card-role">Web Development Agency, Africa</div>
+          </div>
+        </div>
+        <div class="about-badge">
+          <strong>1+</strong>
+          <span>Years of Excellence</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-content">
+      <div class="section-eyebrow reveal">About the Agency</div>
+      <h2 class="section-title reveal reveal-delay-1">Built on the Continent.<br><em>Built for the World.</em></h2>
+      <p class="about-body reveal reveal-delay-2">
+        Godfather Web Services is a premium web development agency rooted in Africa and operating globally. We were founded on a single conviction: every serious organization, business, and entrepreneur deserves a digital presence that commands respect and drives real results.
+      </p>
+      <p class="about-body reveal reveal-delay-2">
+        We understand the African market — its energy, its ambition, its pace. We also understand global standards. That combination allows us to build websites that compete anywhere in the world while speaking authentically to audiences at home.
+      </p>
+      <p class="about-body reveal reveal-delay-2">
+        We are not a generic digital agency. We are specialists. We focus on three categories of websites because focus breeds mastery — and mastery is what our clients deserve.
+      </p>
+
+      <div class="about-pillars reveal reveal-delay-3">
+        <div class="pillar">
+          <h5>Purpose-Driven</h5>
+          <p>Every site we build has a clear job to do. We never design for aesthetics alone.</p>
+        </div>
+        <div class="pillar">
+          <h5>Africa-Grounded</h5>
+          <p>We understand bandwidth realities, cultural contexts, and payment ecosystems that matter here.</p>
+        </div>
+        <div class="pillar">
+          <h5>Globally Competitive</h5>
+          <p>Our code, design, and strategy meet international standards — full stop.</p>
+        </div>
+        <div class="pillar">
+          <h5>Relationship-First</h5>
+          <p>Your success is our portfolio. We invest in long-term partnerships, not one-off transactions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CHOOSE US -->
+<section class="why-us" id="why">
+  <div class="section-eyebrow reveal">Why Godfather Web Services</div>
+  <h2 class="section-title reveal reveal-delay-1">The Difference Is<br><em>Deliberate.</em></h2>
+
+  <div class="why-grid">
+    <div class="why-card reveal">
+      <div class="why-icon">⚡</div>
+      <h4>Performance by Default</h4>
+      <p>Core Web Vitals, optimized assets and clean code are non-negotiable on every project — not an upgrade you pay extra for.</p>
+    </div>
+    <div class="why-card reveal reveal-delay-1">
+      <div class="why-icon">🎯</div>
+      <h4>Conversion Engineering</h4>
+      <p>Every layout decision, CTA placement and copy block is informed by conversion psychology. We build sites that work.</p>
+    </div>
+    <div class="why-card reveal reveal-delay-2">
+      <div class="why-icon">📱</div>
+      <h4>Mobile-First, Always</h4>
+      <p>Over 70% of African web traffic is mobile. We design for the phone first — never the reverse.</p>
+    </div>
+    <div class="why-card reveal reveal-delay-3">
+      <div class="why-icon">🌍</div>
+      <h4>African Context, Global Vision</h4>
+      <p>We understand local payment systems, hosting realities and connectivity nuances that generic agencies miss entirely.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="section-eyebrow reveal">Client Voices</div>
+  <h2 class="section-title reveal reveal-delay-1">They Said It<br><em>Better Than We Could.</em></h2>
+
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <div class="testimonial-stars">
+        <span class="star">★ ★ ★ ★ ★</span>
+      </div>
+      <p class="testimonial-text">
+        "Our school's new website completely transformed how parents and prospective students perceive us. Enrollment inquiries doubled in the first month."
+      </p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">A</div>
+        <div>
+          <div class="author-name">Adaeze Nwosu</div>
+          <div class="author-org">Principal, Eminent Academy, Enugu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial-card reveal reveal-delay-1">
+      <div class="testimonial-stars">
+        <span class="star">★ ★ ★ ★ ★</span>
+      </div>
+      <p class="testimonial-text">
+        "The landing page they built for my affiliate campaign converted at 11.4% — nearly 3x my previous page. The ROI was immediate and undeniable."
+      </p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">K</div>
+        <div>
+          <div class="author-name">Kwame Asante</div>
+          <div class="author-org">Digital Marketer, Accra, Ghana</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial-card reveal reveal-delay-2">
+      <div class="testimonial-stars">
+        <span class="star">★ ★ ★ ★ ★</span>
+      </div>
+      <p class="testimonial-text">
+        "We sold 2,000 tickets online in under 72 hours using the event site they built. The payment flow was seamless and the design was incredible."
+      </p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">F</div>
+        <div>
+          <div class="author-name">Fatimah Bello</div>
+          <div class="author-org">Event Director, The Lagos Summit</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="section-eyebrow reveal">Let's Build Together</div>
+  <h2 class="section-title reveal reveal-delay-1">Your Best Website<br><em>Starts Here.</em></h2>
+  <p class="section-lead reveal reveal-delay-2">
+    Whether you're launching something new or rebuilding what already exists, we're ready to bring the vision, the craft, and the results. Let's talk.
+  </p>
+  <div class="cta-actions reveal reveal-delay-3">
+    <a href="https://wa.me/message/UGOMB6QGBTDFD1m" class="btn-primary">
+      Start a Project
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <a href="#services" class="btn-secondary">Browse Services</a>
+  </div>
+</section>
+
+<!-- DESIGN SYSTEM REFERENCE --> <!--
+<div class="design-system" id="design-system">
+  <div class="design-system-badge">📐 Brand &amp; Design System Reference</div>
+  <h3>Visual Identity Guidelines</h3>
+  <p>Brand language, color palette, and design principles for Godfather Web Services.</p>
+
+  <div class="ds-grid">
+    <div class="ds-section">
+      <h4>Color Palette</h4>
+      <div class="color-swatches">
+        <div class="swatch">
+          <div class="swatch-block" style="background:#0A0A0A;"></div>
+          <div class="swatch-label">#0A0A0A<br>Obsidian Black<br><em style="color:var(--gold);font-size:9px;">Primary BG</em></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#141414;"></div>
+          <div class="swatch-label">#141414<br>Charcoal<br><em style="color:var(--gold);font-size:9px;">Section BG</em></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#C9A84C;"></div>
+          <div class="swatch-label">#C9A84C<br>Sovereign Gold<br><em style="color:var(--gold);font-size:9px;">Primary Accent</em></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#E3C06F;"></div>
+          <div class="swatch-label">#E3C06F<br>Gold Light<br><em style="color:var(--gold);font-size:9px;">Hover States</em></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#F5F2EC;"></div>
+          <div class="swatch-label">#F5F2EC<br>Warm White<br><em style="color:var(--gold);font-size:9px;">Body Text</em></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#C0392B;"></div>
+          <div class="swatch-label">#C0392B<br>Accent Red<br><em style="color:var(--gold);font-size:9px;">Urgency/Alert</em></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ds-section">
+      <h4>Typography System</h4>
+      <div class="type-samples">
+        <div class="type-sample">
+          <div class="type-sample-label">Display — Cormorant Garamond Bold</div>
+          <div class="type-display">Headline Copy</div>
+        </div>
+        <div class="type-sample">
+          <div class="type-sample-label">Display Italic — Gold Emphasis</div>
+          <div class="type-display-italic">Emphasis &amp; Flair</div>
+        </div>
+        <div class="type-sample">
+          <div class="type-sample-label">Body — DM Sans Light 300</div>
+          <div class="type-body">Clean, readable prose at 15–18px. Generous line height.</div>
+        </div>
+        <div class="type-sample">
+          <div class="type-sample-label">Labels &amp; Tags — DM Sans Caps</div>
+          <div class="type-caps">Section Eyebrow Labels</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ds-section">
+      <h4>Design Principles &amp; Style</h4>
+      <div class="design-notes">
+        <div class="design-note"><span class="design-note-arrow">→</span><div><strong>Aesthetic:</strong> Dark luxury editorial. Commanding and authoritative — not flashy or loud.</div></div>
+        <div class="design-note"><span class="design-note-arrow">→</span><div><strong>Layout:</strong> Grid-disciplined with deliberate asymmetry. Generous whitespace. Content density is always controlled.</div></div>
+        <div class="design-note"><span class="design-note-arrow">→</span><div><strong>Motion:</strong> Subtle scroll-triggered reveals only. No gratuitous animation. Movement serves attention, not entertainment.</div></div>
+        <div class="design-note"><span class="design-note-arrow">→</span><div><strong>Gold Rule:</strong> Sovereign gold is used sparingly — headlines, CTAs, icons, and key accents only. Never as decorative noise.</div></div>
+        <div class="design-note"><span class="design-note-arrow">→</span><div><strong>CTA Language:</strong> Action-first, confident, direct. "Start a Project" not "Contact Us". "Build My Site" not "Learn More".</div></div>
+        <div class="design-note"><span class="design-note-arrow">→</span><div><strong>Imagery:</strong> High-contrast editorial photography. Real people, real places. Absolutely no generic stock clichés.</div></div>
+        <div class="design-note"><span class="design-note-arrow">→</span><div><strong>Tech Stack:</strong> Next.js / React, Tailwind CSS, Framer Motion, Vercel hosting, Paystack / Flutterwave integrations.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="#" class="nav-logo" style="text-decoration:none; display:inline-flex;">
+        <div class="logo img"><img src="assets/icon.png" alt="Logo Icon"></div>
+        <div class="logo-text" style="font-size:18px;">
+          Godfather Web Services
+          <span>Web Development Agency</span>
+        </div>
+      </a>
+      <p class="footer-desc">
+        We design and build high-performance websites for organizations, marketers and event organizers — across Africa and around the world.
+      </p>
+    </div>
+
+    <div class="footer-col">
+      <h5>Services</h5>
+      <ul class="footer-links">
+        <li><a href="#services">Organizational Websites</a></li>
+        <li><a href="#services">Landing Pages</a></li>
+        <li><a href="#services">Event &amp; Ticket Sites</a></li>
+        <li><a href="#services">Website Redesign</a></li>
+        <li><a href="#services">SEO &amp; Performance</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul class="footer-links">
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#process">Our Process</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h5>Get in Touch</h5>
+      <ul class="footer-links">
+        <li><a href="mailto: godfathercreativeplanet@gmail.com">Via email</a></li>
+        <li><a href="https://wa.me/message/UGOMB6QGBTDFD1">WhatsApp</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 <span>Godfather Creative Planet</span>. All rights reserved.</p>
+    <div class="footer-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Sidebar toggle functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const overlay = document.getElementById('overlay');
+        const navLinks = document.querySelectorAll('.navlink');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            sidebarToggle.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            // Change icon
+            if (sidebar.classList.contains('open')) {
+                sidebarToggle.innerHTML = '✕';
+            } else {
+                sidebarToggle.innerHTML = '☰';
+            }
+        }
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Close sidebar when clicking a nav link
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // Update active nav link on scroll
+        const sections = document.querySelectorAll('section');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Nav gold border on scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.style.borderBottomColor = window.scrollY > 60
+      ? 'rgba(201,168,76,0.25)'
+      : 'rgba(255,255,255,0.08)';
+  });
+</script>
+</body>
+</html>
